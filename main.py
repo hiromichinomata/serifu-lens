@@ -21,35 +21,38 @@ img.save('output/text.png')
 
 img = Image.new("RGBA", (250, 30))
 text = "CTO"
-draw_text(img, text, (38, 57, 54))
+draw_text(img, text, (255, 255, 255))
 img.save('output/speaker.png')
 
 # merge images
+
+def merge_images(background, foreground_with_alpha, o_h, o_w):
+    alpha = foreground_with_alpha[:,:,3]
+    alpha = cv2.cvtColor(alpha, cv2.COLOR_GRAY2BGR) # 1 -> 3
+    alpha = alpha / 255.0
+
+    foreground = foreground_with_alpha[:,:,:3]
+
+    f_h, f_w, _ = foreground.shape
+    b_h, _, _ = background.shape
+    background[b_h-f_h-o_h:b_h-o_h, o_w:f_w+o_w] = (background[b_h-f_h-o_h:b_h-o_h, o_w:f_w+o_w] * (1.0 - alpha)).astype('uint8')
+    background[b_h-f_h-o_h:b_h-o_h, o_w:f_w+o_w] = (background[b_h-f_h-o_h:b_h-o_h, o_w:f_w+o_w] + (foreground * alpha)).astype('uint8')
+
+    return background
 
  # -1 to read alpha channel
 # foreground: (210, 960, 4)
 message_box_with_alpha =cv2.imread('samples/message_box.png', -1)
 # background: (640, 960, 3)
 hallway = cv2.imread('samples/hallway.jpg')
-alpha = message_box_with_alpha[:,:,3]
-alpha = cv2.cvtColor(alpha, cv2.COLOR_GRAY2BGR) # 1 -> 3
-alpha = alpha / 255.0
-
-message_box = message_box_with_alpha[:,:,:3]
-
-m_h, m_w, _ = message_box.shape
-h_h, _, _ = hallway.shape
-hallway[h_h-m_h:h_h, 0:m_w] = (hallway[h_h-m_h:h_h, 0:m_w] * (1.0 - alpha)).astype('uint8')
-hallway[h_h-m_h:h_h, 0:m_w] = (hallway[h_h-m_h:h_h, 0:m_w] + (message_box * alpha)).astype('uint8')
+hallway = merge_images(hallway, message_box_with_alpha, 0, 0)
 
 # text (80, 750, 3)
-text = cv2.imread('output/text.png')
-t_h, t_w, _ = text.shape
-hallway[h_h-t_h-40:h_h-40, 105:t_w+105] += text
+text_with_alpha = cv2.imread('output/text.png', -1)
+hallway = merge_images(hallway, text_with_alpha, 40, 105)
 
 # speaker (30, 250, 3)
-speaker = cv2.imread('output/speaker.png')
-s_h, s_w, _ = speaker.shape
-hallway[h_h-s_h-145:h_h-145, 50:s_w+50] += speaker
+speaker_with_alpha = cv2.imread('output/speaker.png', -1)
+hallway = merge_images(hallway, speaker_with_alpha, 145, 50)
 
 cv2.imwrite("output/result.png", hallway)
