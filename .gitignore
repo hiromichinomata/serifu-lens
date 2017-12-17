@@ -99,3 +99,10 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+
+
+# project unique settings
+output/*
+!output/.keep
+samples/original/*
