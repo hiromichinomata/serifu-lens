@@ -45,14 +45,14 @@ def merge_images(background, foreground_with_alpha, o_h, o_w):
 message_box_with_alpha =cv2.imread('samples/message_box.png', -1)
 # background: (640, 960, 3)
 hallway = cv2.imread('samples/hallway.jpg')
-hallway = merge_images(hallway, message_box_with_alpha, 0, 0)
+result = merge_images(hallway, message_box_with_alpha, 0, 0)
 
 # text (80, 750, 3)
 text_with_alpha = cv2.imread('output/text.png', -1)
-hallway = merge_images(hallway, text_with_alpha, 40, 105)
+result = merge_images(result, text_with_alpha, 40, 105)
 
 # speaker (30, 250, 3)
 speaker_with_alpha = cv2.imread('output/speaker.png', -1)
-hallway = merge_images(hallway, speaker_with_alpha, 145, 50)
+result = merge_images(result, speaker_with_alpha, 145, 50)
 
-cv2.imwrite("output/result.png", hallway)
+cv2.imwrite("output/result.png", result)
